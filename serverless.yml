@@ -1,0 +1,37 @@
+
+service: aws-node-dynamodb-readandwrite # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+ iamRoleStatements:
+   - Effect: "Allow"
+     Action:
+      - dynamoDb: Query
+      - dynamoDb: GetItem
+      - dynamoDb: PutItem
+      - dynamoDb: UpdateItem
+     Resources: "arn:aws:dynamodb:us-west-2:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+ environment:
+   DYNAMODB_TABLE: apollo-sms-dev-incoming-sms-tracking
+
+functions:
+  readFromDynamoDB:
+    handler: dynamoDbHandler.readFromDynamoDB
+    environment:
+      DYNAMODB_TABLE: dynamodb-read-table
+    events:
+      - http: 
+         path: readFromDynamoDb
+         method: get
+  writeToDynamoDb:
+    handler: dynamoDbHandler.writeToDynamoDb
+    envioronment:
+      DYNAMODB_TABLE: dynamodb-write-table
+    events:
+      - http:
+         path: writeToDynamoDb
+         method: post
+
